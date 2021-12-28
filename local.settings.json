@@ -1,0 +1,15 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "DefaultEndpointsProtocol=https;AccountName=storage2xnkfz3clyn26;AccountKey=W2WG8AYcn7KH+tYJh/riesrrB1qVY15VD6ijzwlaRgTvLpEre6440S74UA1eP71q0/jBaK2WdV/6U5/aX2U15g==",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "AzureWebJobs.HttpTrigger1.Disabled": "false",
+    "FUNCTIONS_EXTENSION_VERSION": "~3",
+    "StorageKind": "AzureStorage",
+    "ResourceGroup": "purview_serverless",
+    "ResourceGroupLocation": "westus",
+    "StorageId": "/subscriptions/0504a9a7-25cb-4269-86d2-a36d9149025f/resourceGroups/purview_serverless/providers/Microsoft.Storage/storageAccounts/storage2xnkfz3clyn26",
+    "ReferenceNamePurview": "purview-2xnkfz3clyn26",
+    "APPINSIGHTS_INSTRUMENTATIONKEY": "340a8979-b993-4190-be46-a44d67699e41"
+  }
+}

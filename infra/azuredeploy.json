@@ -1,0 +1,206 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]"
+
+        },
+        "prefixAppInsights": {
+            "type": "string",
+            "defaultValue": "appinsights-",
+            "metadata": {
+                "description": "Base name of the App Insights instance"
+             }
+        },
+        "prefixFunctionApp": {
+            "type": "string",
+            "defaultValue": "functionapp-",
+            "metadata": {
+                "description": "Base name of the Function App"
+        },
+        "minLength": 3,
+        "maxLength":15
+        },
+        "prefixStorage": {
+            "type": "string",
+            "defaultValue": "storage",
+            "metadata": {
+                "description": "Base name of the Azure Storage Account"
+        },
+        "minLength": 3,
+        "maxLength":15
+        },
+        "prefixAsp": {
+            "type": "string",
+            "defaultValue": "asp-",
+            "metadata": {
+                "description": "Base name of the App Service Plan"
+        },
+        "minLength": 3,
+        "maxLength":15
+        },
+        "prefixPurview": {
+            "type": "string",
+            "defaultValue": "purview-",
+            "metadata": {
+                "description": "Base name of the Purview Instance"
+        },
+        "minLength": 3,
+        "maxLength":15
+        }
+    },
+    "functions": [],
+    "variables": {
+        "uniqueFunctionAppName": "[concat(parameters('prefixFunctionApp'), uniqueString(resourceGroup().id))]",
+        "uniqueAppInsightsName": "[concat(parameters('prefixAppInsights'), uniqueString(resourceGroup().id))]",
+        "uniqueStorageName": "[concat(parameters('prefixStorage'), uniqueString(resourceGroup().id))]",
+        "storageAccountID": "[resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageName'))]",
+        "uniqueAspName": "[concat(parameters('prefixAsp'), uniqueString(resourceGroup().id))]",
+        "uniquePurviewName": "[concat(parameters('prefixPurview'), uniqueString(resourceGroup().id))]",
+        "blobReaderRoleDefinitionId": "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1"                       
+    },
+    "resources": [
+        {
+            "name": "[variables('uniqueStorageName')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2021-04-01",
+            "tags": {
+                "displayName": "[variables('uniqueStorageName')]"
+            },
+            "location": "[parameters('location')]",
+            "kind": "StorageV2",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            }
+        },
+        {
+            "apiVersion": "2015-05-01",
+            "name": "[variables('uniqueAppInsightsName')]",
+            "type": "Microsoft.Insights/components",
+            "kind": "web",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', variables('uniqueFunctionAppName'))]": "Resource"
+            },
+            "properties": {
+                "Application_Type": "web",
+                "ApplicationId": "[variables('uniqueAppInsightsName')]"
+            }
+        },
+        {
+            "name": "[variables('uniqueAspName')]",
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2020-12-01",
+            "location": "[resourceGroup().location]",
+            "kind": "Linux",
+            "sku": {
+                "name": "Y1",
+                "tier": "Dynamic",
+                "size": "Y1",
+                "family": "Y",
+                "capacity": 0
+            },
+            "tags": {
+                "displayName": "[variables('uniqueAspName')]"
+            },
+            "properties": {
+                "name": "[variables('uniqueAspName')]",
+                "reserved": true,
+                "siteConfig": {
+                    "linuxFxVersion": "python|3.8"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Purview/accounts",
+            "apiVersion": "2021-07-01",
+            "name": "[variables('uniquePurviewName')]",
+            "location": "eastus2",
+            "sku": {
+                "name": "Standard",
+                "capacity": 1
+            },
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "cloudConnectors": {},
+                "publicNetworkAccess": "Enabled",
+                "managedResourceGroupName": "[concat('managed-rg-', variables('uniquePurviewName'))]"
+            }
+        },
+        {
+            "name": "[variables('uniqueFunctionAppName')]",
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2021-02-01",
+            "location": "[resourceGroup().location]",
+            "kind": "functionapp",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', variables('uniqueAspName'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageName'))]"
+            ],
+            "properties": {
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('uniqueAspName'))]",
+                "linuxFxVersion": "PYTHON|3.8",
+                // "alwaysOn": true,
+                "reserved": true,
+                "siteConfig": {
+                    "appSettings": [
+                        {
+                            "name": "AzureWebJobsStorage",
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('uniqueStorageName'), ';AccountKey=', listKeys(variables('storageAccountID'),'2015-05-01-preview').key1)]"
+                        },
+                        {
+                            "name": "FUNCTIONS_WORKER_RUNTIME",
+                            "value": "python"
+                        },
+                        {
+                            "name": "FUNCTIONS_EXTENSION_VERSION",
+                            "value": "~3"
+                        },
+                        {
+                            "name": "StorageKind",
+                            "value": "AzureStorage"
+                        },
+                        {
+                            "name": "ResourceGroup",
+                            "value": "[resourceGroup().name]"
+                        },
+                        {
+                            "name": "ResourceGroupLocation",
+                            "value": "[resourceGroup().location]"
+                        },
+                        {
+                            "name": "StorageId",
+                            "value": "[resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageName'))]"
+                        },
+                        {
+                            "name": "ReferenceNamePurview",
+                            "value": "[variables('uniquePurviewName')]"
+                        },
+                        {
+                            "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                            "value": "[reference(resourceId('microsoft.insights/components/', variables('uniqueAppInsightsName')), '2015-05-01').InstrumentationKey]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2020-04-01-preview",
+            "name": "[guid('purview', variables('blobReaderRoleDefinitionId'), resourceGroup().id)]",
+            "properties": {
+                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('blobReaderRoleDefinitionId'))]",
+                "principalId": "[reference(resourceId('Microsoft.Purview/accounts', variables('uniquePurviewName')), '2021-07-01', 'Full').identity.principalId]",
+                // "principalId": "aab77481-39b3-462d-9137-a81168964d40",
+                // "principalId": "144b4a33-a48b-45c3-aa2f-dc0636cddd8b",
+                "scope": "[resourceGroup().id]"
+            }
+        }
+    ],
+    "outputs": {}
+}
