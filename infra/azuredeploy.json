@@ -59,7 +59,8 @@
         "storageAccountID": "[resourceId('Microsoft.Storage/storageAccounts', variables('uniqueStorageName'))]",
         "uniqueAspName": "[concat(parameters('prefixAsp'), uniqueString(resourceGroup().id))]",
         "uniquePurviewName": "[concat(parameters('prefixPurview'), uniqueString(resourceGroup().id))]",
-        "blobReaderRoleDefinitionId": "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1"                       
+        "blobReaderRoleDefinitionId": "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1",                      
+        "purviewAdminrRoleDefinitionId": "200bba9e-f0c8-430f-892b-6f0794863803"                                       
     },
     "resources": [
         {
@@ -166,6 +167,10 @@
                             "value": "AzureStorage"
                         },
                         {
+                            "name": "StorageName",
+                            "value": "[variables('uniqueStorageName')]"
+                        },
+                        {
                             "name": "ResourceGroup",
                             "value": "[resourceGroup().name]"
                         },
@@ -187,6 +192,9 @@
                         }
                     ]
                 }
+            },
+            "identity": {
+                "type": "SystemAssigned"
             }
         },
         {
@@ -196,8 +204,6 @@
             "properties": {
                 "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('blobReaderRoleDefinitionId'))]",
                 "principalId": "[reference(resourceId('Microsoft.Purview/accounts', variables('uniquePurviewName')), '2021-07-01', 'Full').identity.principalId]",
-                // "principalId": "aab77481-39b3-462d-9137-a81168964d40",
-                // "principalId": "144b4a33-a48b-45c3-aa2f-dc0636cddd8b",
                 "scope": "[resourceGroup().id]"
             }
         }
