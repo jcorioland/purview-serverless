@@ -1,6 +1,6 @@
 from azure.purview.scanning import PurviewScanningClient
 from azure.core.paging import ItemPaged
-from azure.core.exceptions import AzureError
+from azure.core.exceptions import AzureError, ClientAuthenticationError, ResourceNotFoundError, ResourceExistsError
 from utils.purview_client import get_purview_client
 from utils.request_validation import RequestValidation
 
@@ -25,8 +25,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         try:
             client = get_purview_client()
         except AzureError as e:
+            logging.warning("Error")
+            logging.warning(e)
             return func.HttpResponse(
-                e.message, status_code=e.status_code
+                "Internal Server Error", status_code=500
         )
     
         ds_name = rv.params["ds_name"]
@@ -34,8 +36,15 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             response = client.data_sources.delete(ds_name)
             logging.info(response)
             return func.HttpResponse(f"Data source {ds_name} successfully deleted")
-        except AzureError as e:
+        except (ClientAuthenticationError, ResourceNotFoundError, ResourceExistsError) as e:
+            logging.warning(f"Error - Status code : {e.status_code} ")
+            logging.warning(e.message)
             return func.HttpResponse(
                 e.message, status_code=e.status_code
         )
-            
+        except AzureError as e:
+            logging.warning("Error")
+            logging.warning(e)
+            return func.HttpResponse(
+                "Internal Server Error", status_code=500
+        )

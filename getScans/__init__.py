@@ -7,10 +7,11 @@ import json
 import azure.functions as func
 
 
-def get_all_datasources(client):
+def get_all_scans_by_ds(client, ds_name:str):
     try:
         result = {}
-        response = client.data_sources.list_all()
+        response = client.scans.list_by_data_source(ds_name)
+
     except (ClientAuthenticationError, ResourceNotFoundError, ResourceExistsError) as e:
         logging.warning(f"Error - Status code : {e.status_code} ")
         logging.warning(e.message)
@@ -18,24 +19,25 @@ def get_all_datasources(client):
             e.message, status_code=e.status_code
     )
     except AzureError as e:
-        logging.warning("Error")
+        logging.warning(f"Error")
         logging.warning(e)
         return func.HttpResponse(
             "Internal Server Error", status_code=500
     )
     else:
         list_items = [item for item in response]
-        result["nb_datasources"] = len(list_items)
-        result["datasources"] = list_items
+
+        result["nb_scans"] = len(list_items)
+        result["scans"] = list_items
         
         logging.info(response)
-        return func.HttpResponse(body=json.dumps(result), mimetype="application/json", status_code=200)
+        return func.HttpResponse(body=json.dumps(result), mimetype="application/json", status_code=200) 
+        
 
+def get_scan_by_name(client, ds_name:str, scan_name:str):
 
-def get_datasource_by_name(client, ds_name:str):
     try:
-
-        response = client.data_sources.get(ds_name)
+        response = client.scans.get(ds_name, scan_name)
         logging.info(response)
 
         return func.HttpResponse(body=json.dumps(response), mimetype="application/json", status_code=200)
@@ -52,22 +54,27 @@ def get_datasource_by_name(client, ds_name:str):
             "Internal Server Error", status_code=500
     )
 
+
 def main(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info('This HTTP  function to get datasources executed successfully.')
+    logging.info('This HTTP function to get scans executed successfully.')
 
     ds_name = req.route_params.get('ds_name')
+    scan_name = req.route_params.get('scan_name')
+
     try:
         client = get_purview_client()
     except AzureError as e:
-        logging.warning(f"Error")
+        logging.warning("Error")
         logging.warning(e)
         return func.HttpResponse(
             "Internal Server Error", status_code=500
     )
-#Check if we want to list all the datasource or check a specific datasource
-    if ds_name:
-        return get_datasource_by_name(client, ds_name)
+
+    #Check if we want to list all the scans or check a specific scan
+    if scan_name:
+        return get_scan_by_name(client, ds_name, scan_name)
     else:
-        return get_all_datasources(client)
+        return get_all_scans_by_ds(client, ds_name)
+
 
 

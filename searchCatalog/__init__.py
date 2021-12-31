@@ -2,7 +2,7 @@ import logging
 import json
 import azure.functions as func
 from utils.purview_client import get_catalog_client
-from azure.core.exceptions import AzureError
+from azure.core.exceptions import AzureError, ClientAuthenticationError, ResourceNotFoundError, ResourceExistsError
 from utils.request_validation import RequestValidation
 
 
@@ -16,15 +16,17 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     if not rv.valid:
         return func.HttpResponse(
-            "This HTTP triggered function to create or update a datasource executed successfully. " + rv.message,
+            "This HTTP triggered function to search the catalog executed successfully. " + rv.message,
             status_code=400
         )
     else:
         try:
             client_catalog = get_catalog_client()
         except AzureError as e:
+            logging.warning(f"Error")
+            logging.warning(e)
             return func.HttpResponse(
-                e.message, status_code=e.status_code
+                "Internal Server Error", status_code=500
         )
 
         keywords = rv.params["keywords"]
@@ -39,5 +41,3 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             return func.HttpResponse(
                 e.message, status_code=e.status_code
         )
-
-# his HTTP triggered function search the catalog executed successfully. Please add your keywords name in the query string or in the request body.3

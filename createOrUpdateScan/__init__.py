@@ -1,9 +1,10 @@
 from azure.purview.scanning import PurviewScanningClient
 from azure.core.paging import ItemPaged
-from azure.core.exceptions import AzureError
+from azure.core.exceptions import AzureError, ClientAuthenticationError, ResourceNotFoundError, ResourceExistsError
 from utils.purview_client import get_purview_client
 from utils.request_validation import RequestValidation
 
+import os
 import logging
 import uuid
 import azure.functions as func
@@ -25,18 +26,20 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         try:
             client = get_purview_client()
         except AzureError as e:
+            logging.warning("Error")
+            logging.warning(e)
             return func.HttpResponse(
-                e.message, status_code=e.status_code
+                "Internal Server Error", status_code=500
         )
     
         body_input = {
-                "kind":"AzureStorageMsi",
+                "kind":f"{os.environ['StorageKind']}Msi",
                 "properties": { 
-                    "scanRulesetName": "AzureStorage", 
+                    "scanRulesetName": os.environ['StorageKind'], 
                     "scanRulesetType": "System", 
                     "collection": 
                         {
-                            "referenceName": "purviewideasharing", 
+                            "referenceName": os.environ['ReferenceNamePurview'], 
                             "type": "CollectionReference"
                         }
                 }
@@ -47,8 +50,15 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             response = client.scans.create_or_update(data_source_name=ds_name, scan_name=scan_name, body=body_input)
             logging.info(response)
             return func.HttpResponse(f"Scan {scan_name} successfully created or updated")
-        except AzureError as e:
+        except (ClientAuthenticationError, ResourceNotFoundError, ResourceExistsError) as e:
+            logging.warning(f"Error - Status code : {e.status_code} ")
+            logging.warning(e.message)
             return func.HttpResponse(
                 e.message, status_code=e.status_code
         )
-            
+        except AzureError as e:
+            logging.warning("Error")
+            logging.warning(e)
+            return func.HttpResponse(
+                "Internal Server Error", status_code=500
+        )

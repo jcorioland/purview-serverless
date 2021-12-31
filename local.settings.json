@@ -10,6 +10,7 @@
     "ResourceGroupLocation": "westus",
     "StorageId": "/subscriptions/0504a9a7-25cb-4269-86d2-a36d9149025f/resourceGroups/purview_serverless/providers/Microsoft.Storage/storageAccounts/storage2xnkfz3clyn26",
     "ReferenceNamePurview": "purview-2xnkfz3clyn26",
-    "APPINSIGHTS_INSTRUMENTATIONKEY": "340a8979-b993-4190-be46-a44d67699e41"
+    "APPINSIGHTS_INSTRUMENTATIONKEY": "340a8979-b993-4190-be46-a44d67699e41",
+    "StorageName": "storage2xnkfz3clyn26"
   }
 }

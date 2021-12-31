@@ -1,6 +1,6 @@
 from azure.purview.scanning import PurviewScanningClient
 from azure.core.paging import ItemPaged
-from azure.core.exceptions import AzureError
+from azure.core.exceptions import AzureError, HttpResponseError,ClientAuthenticationError, ResourceNotFoundError, ResourceExistsError
 from utils.purview_client import get_purview_client
 from utils.request_validation import RequestValidation
 
@@ -26,21 +26,23 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         try:
             client = get_purview_client()
         except AzureError as e:
+            logging.warning("Error")
+            logging.warning(e)
             return func.HttpResponse(
-                e.message, status_code=e.status_code
+                "Internal Server Error", status_code=500
         )
-    
+        
         body_input = {
             "kind": "AzureStorage",
             "properties": {
-                "endpoint": "https://storagideasharingtwo.blob.core.windows.net/",
-                "resourceGroup": "idea_sharing",
-                "location": "francecentral",
-                "resourceName": "storageideasharingtwo",
-                "resourceId": "/subscriptions/0504a9a7-25cb-4269-86d2-a36d9149025f/resourceGroups/idea_sharing/providers/Microsoft.Storage/storageAccounts/storagideasharingtwo",
+                "endpoint": f"https://{os.environ['StorageName']}.blob.core.windows.net/",
+                "resourceGroup": os.environ['ResourceGroup'],
+                "location": os.environ['ResourceGroupLocation'],
+                "resourceName": os.environ['StorageName'],
+                "resourceId": os.environ['StorageId'],
                 "collection": {
                     "type": "CollectionReference",
-                    "referenceName": "purviewideasharing"
+                    "referenceName": os.environ['ReferenceNamePurview']
                 },
                 "dataUseGovernance": "Disabled"
             }
@@ -50,7 +52,15 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             response = client.data_sources.create_or_update(ds_name, body=body_input)
             logging.info(response)
             return func.HttpResponse(f"Data source {ds_name} successfully created or updated")
-        except AzureError as e:
+        except (ClientAuthenticationError, ResourceNotFoundError, ResourceExistsError) as e:
+            logging.warning(f"Error - Status code : {e.status_code} ")
+            logging.warning(e.message)
             return func.HttpResponse(
                 e.message, status_code=e.status_code
+        )
+        except AzureError as e:
+            logging.warning("Error")
+            logging.warning(e)
+            return func.HttpResponse(
+                "Internal Server Error", status_code=500
         )

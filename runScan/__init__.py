@@ -1,6 +1,6 @@
 from azure.purview.scanning import PurviewScanningClient
 from azure.core.paging import ItemPaged
-from azure.core.exceptions import AzureError
+from azure.core.exceptions import AzureError, ClientAuthenticationError, ResourceNotFoundError, ResourceExistsError
 from utils.purview_client import get_purview_client
 from utils.request_validation import RequestValidation
 
@@ -18,15 +18,17 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     if not rv.valid:
         return func.HttpResponse(
-            "This HTTP triggered function to create or update a scan executed successfully. " + rv.message,
+            "This HTTP triggered function run a scan executed successfully. " + rv.message,
             status_code=400
         )
     else:
         try:
             client = get_purview_client()
         except AzureError as e:
+            logging.warning("Error")
+            logging.warning(e)
             return func.HttpResponse(
-                e.message, status_code=e.status_code
+                "Internal Server Error", status_code=500
         )
     
         ds_name = rv.params["ds_name"]
