@@ -27,4 +27,4 @@ We provide:
     
 * An ARM Template to deploy the architecture
     
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://github.com/atrao/purview-serverless/blob/main/infra/azuredeploy.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https%3A%2F%2Fraw.githubusercontent.com%2Fatrao%2Fpurview-serverless%2Fmain%2Finfra%2Fazuredeploy.json)
