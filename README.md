@@ -14,7 +14,7 @@ We provide:
     * Running a scan
     * Retrieving datasources
     * Retrieving scans and their runs histories
-    * Search the Purview catalog
+    * Searching the Purview catalog
     
 * A basic serverless Architecture composed of:
     * Azure Storage 
@@ -27,4 +27,4 @@ We provide:
     
 * An ARM Template to deploy the architecture
     
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://raw.githubusercontent.com/atrao/purview-serverless/documentation/infra/azuredeploy.json?token=AUMPCYFDZFR6OHDUUHUIK6TB2M7SK)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fatrao%2Fpurview-serverless%2Fdocumentation%2Finfra%2Fazuredeploy.json)
