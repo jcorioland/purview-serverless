@@ -7,7 +7,7 @@ In this repo, you will find a sample project that showcases the use of the Pytho
 In this repo, we cover the typical use-case of a company that owns a DataLake, and wants to scans its assets with Purview. 
 We provide:
 
-* A sample code that uses the Azure  purview Scanning [PUT LINK] and Catalog [PUT LINK] SDKs to do the most common operations in Python, namely:
+* A sample code that uses the Azure purview Scanning [PUT LINK] and Catalog [PUT LINK] SDKs to do the most common operations in Python, namely:
     * Registering a datasource
     * Deleting a datasource
     * Creating a scan
@@ -27,3 +27,4 @@ We provide:
     
 * An ARM Template to deploy the architecture
     
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://github.com/atrao/purview-serverless/blob/main/infra/azuredeploy.json)
