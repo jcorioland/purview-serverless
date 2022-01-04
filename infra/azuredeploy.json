@@ -2,11 +2,6 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "location": {
-            "type": "string",
-            "defaultValue": "[resourceGroup().location]"
-
-        },
         "prefixAppInsights": {
             "type": "string",
             "defaultValue": "appinsights-",
@@ -53,6 +48,7 @@
     },
     "functions": [],
     "variables": {
+        "location": "[resourceGroup().location]",
         "uniqueFunctionAppName": "[concat(parameters('prefixFunctionApp'), uniqueString(resourceGroup().id))]",
         "uniqueAppInsightsName": "[concat(parameters('prefixAppInsights'), uniqueString(resourceGroup().id))]",
         "uniqueStorageName": "[concat(parameters('prefixStorage'), uniqueString(resourceGroup().id))]",
@@ -69,7 +65,7 @@
             "tags": {
                 "displayName": "[variables('uniqueStorageName')]"
             },
-            "location": "[parameters('location')]",
+            "location": "[variables('location')]",
             "kind": "StorageV2",
             "sku": {
                 "name": "Standard_LRS",
