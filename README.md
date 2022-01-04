@@ -28,6 +28,12 @@ We provide:
     <!-- [PUT DIAGRAM] -->
 
 # How to use 
+This sample requires you to have a recent version of Python installed (3.6+ although we recommend 3.8+). 
+There are three main steps described next:
+1. [Deploying the required resources](#running-the-functions)
+2. [Deploying the Function App](#deploying-the-function-app)
+3. [Granting the Function App access to Purview](#)
+
 ## Deploying the infrastructure
 You have two options to deploy the infrastructure with the provided [ARM Template](https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/overview).
 
@@ -86,23 +92,87 @@ Steps:
     pip install -r requirements.txt
     ```
 
-4. Go on the Azure Extension tab and roll out Functions. The Function App appears under the "Local Project" folder.
-    <!-- Include image here  -->
+4. Go on the Azure Extension tab and sign-in to your Azure account. Roll out Functions menu: the Function App appears under your subscription and the "Local Project" folder.
 
-
-
-
+5. On the Functions menu, click on the "Deploy the Function App" button:
+    ![Deploy a Function App via Visual Studio Code](./.assets/deploy-functionapp-vscode.png)
+Whem prompted, select your subscription and the remote Function app at the top of the editor.
 
 ### Option 2: Deploy with the Azure CLI
+Will soon be detailed.
 
+## Grant the Function app the access to the Purview instance
+In the ARM template, we are turning on the [System Managed Identity](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview) of the Azure Function App. In this last step, we are granting rights to this managed identity on the root collection of Purview. This is done via the portal.
+
+1. First go on the [Azure portal](https://portal.azure.com/#home), and access the Azure Function App resource  that was deployed previously. On the left pane, select "Identity" under the "Settings" tab:
+
+    ![Identity tab of the Function App](./.assets/identity-dark.png#gh-dark-mode-only)
+    ![Identity tab of the Function App](./.assets/identity-dark.png#gh-light-mode-only)
+
+    Ensure that under "System Assigned", "Status" is toggled on.
+
+2. Access the Purview instance via the portal. 
+
+   Select "Open Purview Studio" or [open Azure Purview's home page](https://ms.web.purview.azure.com/) and choose the instance that you deployed.
+
+3. Inside Purview Studio, go to the collections:
+
+    ![Azure Purview Collections menu](./.assets/purview-collections.png)
+
+    Select the root collection, and go on the "Role assignments" tab.
+    Add the Function App in the following roles: Collection admins, Data source admins, Data curators, Data readers.
 
 
 ##  Running the functions
-### Run the functions locally 
-To run the functions locally, you need have the needed packages installed, as described above. 
-<!-- [Insert link here to the descirption] -->
+Once the three steps above are complete, you can run the functions in several manners. For example:
+
+* [Via the portal](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-function-app-portal#test-the-function)
+* Using a tool or an extension to trigger HTTP requests, like [Postman](https://www.postman.com/) 
+* Using the Azure [Functions extension of Visual Studio Code](https://docs.microsoft.com/en-us/azure/azure-functions/functions-develop-vs-code?tabs=python#run-functions).
 
 
-### Examples
-<!-- Notes on choices (Storage Kind) -->
-Examples of code 
+## Examples
+
+Will soon contain examples.
+
+## Notes on the design and the code
+* During the deployment, we configure App settings for the Function App. Those settings are used several parts of the code.
+* The Purview instance is toggled on and is granted the access to the Storage account using the ARM template
+* For the sake of this sample, we work exclusively with the root collection of Purview
+* Purview can work with many data sources types. However in this sample, we only work with the "Azure Storage" type that we define in the App settings. To work with different types, you can adapt body that is used in several functions:
+
+    ```
+    {
+        "kind":f"{os.environ['StorageKind']}Msi", 
+        "properties": { 
+            "scanRulesetName": os.environ['StorageKind'], 
+            "scanRulesetType": "System", 
+            "collection": 
+                {
+                    "referenceName": os.environ['ReferenceNamePurview'], 
+                    "type": "CollectionReference"
+                }
+        }
+    }
+    ```
+    For example if you want to register an AWS S3 bucket, you can change the body to:
+    ```
+    {
+        "kind": "AmazonS3",
+        "name": "ChosenDatasourceName",
+        "properties": {
+            "serviceUrl": "s3://yourbucketserviceurl",
+            "collection": {
+                "referenceName": s.environ['ReferenceNamePurview'],
+                "type": "CollectionReference",
+            }
+        }
+    }
+    ```
+
+
+
+
+
+
+
