@@ -5,7 +5,6 @@ from utils.purview_client import get_purview_client
 from utils.request_validation import RequestValidation
 
 import logging
-import uuid
 import azure.functions as func
 
 

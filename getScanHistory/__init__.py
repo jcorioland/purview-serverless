@@ -1,7 +1,6 @@
 from azure.core.exceptions import AzureError, ClientAuthenticationError, ResourceNotFoundError, ResourceExistsError
 from utils.purview_client import get_purview_client
 
-import os
 import logging
 import json
 import azure.functions as func

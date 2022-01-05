@@ -35,7 +35,7 @@ There are three main steps described next:
 3. [Granting the Function App access to Purview](#)
 
 ## Deploying the infrastructure
-You have two options to deploy the infrastructure with the provided [ARM Template](https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/overview).
+You have two options to deploy the infrastructure with the provided [ARM Template](https://docs.microsoft.com/azure/azure-resource-manager/templates/overview).
 
 ### Option 1: Deploy the ARM template via the portal
 Click on the following button: 
@@ -57,8 +57,8 @@ This option requires the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/
 2. Create a Resource Group 
 
     ```
-    $resourceGroup = "MyResourceGroupName"
-    $location = "westeurope" 
+    resourceGroup="MyResourceGroupName"
+    location="westeurope" 
     az group create -n $resourceGroup -l $location
     ```
 
@@ -72,10 +72,8 @@ This option requires the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/
     az deployment group create --resource-group $resourceGroup --template-file ./infra/azuredeploy.json
     ```
 
-
-
 ## Deploying the Function App 
-You can deploy the Function App in various ways. Here we presentt two of them: via Visual Studio Code or the Azure CLI.
+You can deploy the Function App in various ways. Here we present two of them: using Visual Studio Code or the Azure CLI.
 
 ### Option 1: Deploy with VS Code
 This option requires the installation of [Visual Studio Code](https://code.visualstudio.com/) and the [Azure Functions extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions).
@@ -102,7 +100,7 @@ Whem prompted, select your subscription and the remote Function app at the top o
 Will soon be detailed.
 
 ## Grant the Function app the access to the Purview instance
-In the ARM template, we are turning on the [System Managed Identity](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview) of the Azure Function App. In this last step, we are granting rights to this managed identity on the root collection of Purview. This is done via the portal.
+In the ARM template, we are turning on the [System Managed Identity](https://docs.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview) of the Azure Function App. In this last step, we are granting rights to this managed identity on the root collection of Purview. This is done via the portal.
 
 1. First go on the [Azure portal](https://portal.azure.com/#home), and access the Azure Function App resource  that was deployed previously. On the left pane, select "Identity" under the "Settings" tab:
 
@@ -113,14 +111,14 @@ In the ARM template, we are turning on the [System Managed Identity](https://doc
 
 2. Access the Purview instance via the portal. 
 
-   Select "Open Purview Studio" or [open Azure Purview's home page](https://ms.web.purview.azure.com/) and choose the instance that you deployed.
+   Select "Open Purview Studio" or [open Azure Purview's home page](https://web.purview.azure.com/) and choose the instance that you deployed.
 
 3. Inside Purview Studio, go to the collections:
 
     ![Azure Purview Collections menu](./.assets/purview-collections.png)
 
     Select the root collection, and go on the "Role assignments" tab.
-    Add the Function App in the following roles: Collection admins, Data source admins, Data curators, Data readers.
+    Add the Function App (using its name) in the following roles: Collection admins, Data source admins, Data curators, Data readers.
 
 
 ##  Running the functions
@@ -128,7 +126,7 @@ Once the three steps above are complete, you can run the functions in several ma
 
 * [Via the portal](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-function-app-portal#test-the-function)
 * Using a tool or an extension to trigger HTTP requests, like [Postman](https://www.postman.com/) 
-* Using the Azure [Functions extension of Visual Studio Code](https://docs.microsoft.com/en-us/azure/azure-functions/functions-develop-vs-code?tabs=python#run-functions).
+* Using the Azure [Functions extension of Visual Studio Code](https://docs.microsoft.com/azure/azure-functions/functions-develop-vs-code?tabs=python#run-functions).
 
 
 ## Examples

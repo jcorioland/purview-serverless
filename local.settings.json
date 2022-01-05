@@ -1,3 +1,5 @@
+// Has this file be committed by mistake? Looks like it contains credentials and specific Azure subscription information
+// Should probably be removed before publication
 {
   "IsEncrypted": false,
   "Values": {

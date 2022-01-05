@@ -6,7 +6,6 @@ from utils.request_validation import RequestValidation
 
 import os
 import logging
-import uuid
 import azure.functions as func
 
 
