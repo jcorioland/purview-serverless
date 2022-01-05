@@ -132,8 +132,59 @@ Once the three steps above are complete, you can run the functions in several ma
 
 
 ## Examples
+The functions have input parameters that need to be specified either as query parameters or passed in a body input. However functions that only accept GET requests (like _getDatasources_ for instance) only accept [route parameters](https://docs.microsoft.com/en-us/azure/azure-functions/functions-bindings-http-webhook-trigger?tabs=csharp#using-route-parameters). 
+Here are a some examples:
 
-Will soon contain examples.
+* Registering a new Datasource (Azure Storage):
+    
+    Trigger the _createOrUpdateDatasource_ function with the following request body:
+    ```
+    {
+        "ds_name": "myDataSource"
+    }
+    ```
+    or pass _ds_name_ as a query parameter.
+
+* Creating a scan:
+
+    
+    Trigger the _createOrUpdateScan_ function with the following request body:
+    ```
+    {
+        "ds_name": "myDataSource",
+        "scan_name": "myScanName"
+    }
+    ```
+    or pass _ds_name_ and _scan_name_as a query parameters.
+
+* Running a scan:
+    
+    Trigger the _runScan_ function with the following request body:
+    ```
+    {
+        "ds_name": "myDataSource",
+        "scan_name": "myScanName"
+    }
+    ```
+    or pass _ds_name_ and _scan_name_as a query parameters.
+
+* Getting a scan run history:
+    Trigger the _getScanHistory_ function with a GET request by specifiying route parameters:
+    '''
+    https://yourfunctionappname.azurewebsites.net/api/runs/ds_name/scan_name
+    '''
+
+* Searching for an asset
+    Trigger the _searchCatalog_ function with the following request body:
+    ```
+    {
+        "keywords": "mySearch"
+    }
+    ```
+    or pass "keywords" as a query parameter.
+
+* etc...
+
 
 ## Notes on the design and the code
 * During the deployment, we configure App settings for the Function App. Those settings are used several parts of the code.
@@ -163,7 +214,7 @@ Will soon contain examples.
         "properties": {
             "serviceUrl": "s3://yourbucketserviceurl",
             "collection": {
-                "referenceName": s.environ['ReferenceNamePurview'],
+                "referenceName": os.environ['ReferenceNamePurview'],
                 "type": "CollectionReference",
             }
         }
